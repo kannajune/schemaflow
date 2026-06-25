@@ -1,18 +1,30 @@
 # SchemaFlow
 
-Interactive, accessible database-schema visualization — with diagram ⇄ SQL.
+**Your database schema, read straight from your code — as an interactive diagram you can query and edit.**
 
-SchemaFlow reads any project's SQL / migrations (ORM models next) and renders a
-clean, interactive schema you can click, expand, and query. It is **not** another
-static diagram renderer. Its job is the interaction layer and one honest idea:
+Point it at any project. SchemaFlow parses your **SQL, Prisma, Django, SQLAlchemy
+or TypeORM**, renders an interactive ER diagram, turns a click into a JOIN, and an
+edit into a migration — all locally, no database connection, no LLM, no tokens.
 
-- **Declared relationships** (FK constraints in the DDL) are **facts** → solid edges.
-- **Inferred relationships** (an `x_id` column matched to a table by naming, with
-  no constraint) are **guesses** → dashed edges you verify.
+> Not another static diagram renderer, and not a database client. It lives in your
+> **codebase**, not against your database — so it runs offline, in CI, and in PRs.
 
-Rendering uses **React Flow** (interactive) with Mermaid export planned. The tool
-is **language-agnostic**: it reads any app's schema regardless of what that app is
-written in. Built in TypeScript, shipped as a CLI.
+### What makes it different
+
+- **Honest relationships, three tiers.** It never pretends a guess is a fact:
+  - 🟦 **declared** — a real FK constraint (solid)
+  - 🟩 **observed** — seen in actual query JOINs, mined alias-aware from your SQL (dashed teal)
+  - 🟧 **inferred** — only a naming match, `x_id` → table (dashed amber, "verify")
+- **Diagram → SQL, deterministically.** Select two tables and it finds the join
+  path (BFS, pulls in bridge tables) and writes the query — **$0 tokens**, instant,
+  reproducible, never hallucinates a column.
+- **Diagram ⇄ schema.** Edit a column in the UI → get the `ALTER TABLE`. Export
+  **Mermaid / DBML**. A deterministic **advisor** flags missing PKs/FK constraints.
+- **Runs everywhere a dev is allowed to work** — npm/`npx`, a standalone binary
+  (no Node), a VS Code extension, a JetBrains plugin, and a GitHub Action.
+
+Built in TypeScript by [**kannajune**](https://github.com/kannajune). MIT licensed —
+use it, fork it, ship it.
 
 ## Quick start
 
