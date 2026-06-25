@@ -57,7 +57,9 @@ function renderHtml(model: SchemaModel): string {
     `img-src https: data:; style-src 'unsafe-inline' https://esm.sh; font-src https://esm.sh; ` +
     `script-src 'unsafe-inline' https://esm.sh; connect-src https://esm.sh;">`;
   const inject = `<script>window.__SCHEMAFLOW_MODEL__ = ${JSON.stringify(model)};</script>`;
-  return INDEX_HTML.replace('<head>', `<head>\n${csp}\n${inject}`);
+  // Function replacer: the model JSON can contain `$` sequences that a plain
+  // replacement string would mis-interpret.
+  return INDEX_HTML.replace('<head>', () => `<head>\n${csp}\n${inject}`);
 }
 
 export function deactivate(): void {}

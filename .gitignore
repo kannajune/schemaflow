@@ -4,6 +4,7 @@ dist/
 .DS_Store
 # generated at install/build time
 packages/*/src/html.generated.ts
+packages/server/public/index.html
 packages/jetbrains/src/main/resources/web/
 # gradle / jetbrains build output
 packages/jetbrains/.gradle/

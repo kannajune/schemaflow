@@ -28,5 +28,4 @@ cd packages/jetbrains
 **Tools → SchemaFlow: Open Schema Diagram** in any project containing
 `.sql`, `schema.prisma`, `models.py`, or `*.entity.ts` files.
 
-> Note: the UI loads React / React Flow from the esm.sh CDN at first paint
-> (needs internet that first time); vendoring for full offline is a follow-up.
+The UI (React + React Flow) is bundled into the page — fully offline, no CDN.

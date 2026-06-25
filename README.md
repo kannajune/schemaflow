@@ -98,10 +98,8 @@ schemaflow ./your-project
 ```
 
 Windows: download `schemaflow-windows-x64.exe` from Releases. Build locally with Bun:
-`npm run build:bin`.
-
-> Note: the app logic is fully embedded, but the UI currently loads React/React Flow
-> from the esm.sh CDN at first paint — fully-offline UI (vendored libs) is a follow-up.
+`npm run build:bin`. The UI (React + React Flow) is **bundled in** — fully offline,
+no CDN, works in air-gapped environments.
 
 ## GitHub Action
 

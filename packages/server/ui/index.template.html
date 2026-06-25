@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SchemaFlow</title>
+  <!--RF_CSS-->
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; background: #0b0f17; color: #e6edf3; }
+    #root { width: 100vw; height: 100vh; }
+
+    /* Fixed row metrics so column-level edge handles can be positioned precisely. */
+    .sf-node { background: #111826; border: 1px solid #243046; border-radius: 8px; width: 230px; font-size: 12px; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+    .sf-head { height: 38px; box-sizing: border-box; display: flex; align-items: center; padding: 0 12px; background: #1b2638; font-weight: 600; color: #7dd3fc; border-bottom: 1px solid #243046; letter-spacing: .02em; border-radius: 8px 8px 0 0; cursor: grab; }
+    .sf-head:active { cursor: grabbing; }
+    .sf-head .grip { color: #44546b; margin-right: 8px; letter-spacing: -1px; }
+    .sf-collapse { font: inherit; font-size: 11px; line-height: 1; cursor: pointer; color: #7dd3fc; background: transparent; border: none; padding: 0 6px 0 0; }
+    .sf-count { margin-left: auto; font-size: 10px; color: #5d6b80; background: #0b0f17; border: 1px solid #243046; border-radius: 10px; padding: 1px 7px; }
+    .sf-col { height: 30px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 12px; border-bottom: 1px solid #161f2e; }
+    .sf-col:last-child { border-bottom: none; }
+    .sf-left { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .sf-check { width: 13px; height: 13px; margin: 0; cursor: pointer; accent-color: #38bdf8; flex: none; }
+    .sf-name { color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sf-name.pk { color: #fbbf24; font-weight: 600; }
+    .sf-name.fk { color: #7dd3fc; }
+    .sf-badge { font-size: 9px; padding: 1px 4px; border-radius: 4px; margin-left: 6px; vertical-align: middle; }
+    .sf-badge.fk { background: #0e2a3a; color: #7dd3fc; border: 1px solid #1d4a63; }
+    .sf-type { color: #5d6b80; font-variant: small-caps; }
+
+    /* Handles: small dots sitting on the exact column row. */
+    .react-flow__handle { width: 7px; height: 7px; border: none; background: #3a4a63; }
+    .react-flow__handle.sf-h-declared { background: #38bdf8; }
+    .react-flow__handle.sf-h-observed { background: #2dd4bf; }
+    .react-flow__handle.sf-h-inferred { background: #f59e0b; }
+
+    .sf-legend { position: absolute; top: 14px; left: 14px; z-index: 10; background: rgba(17,24,38,.85); border: 1px solid #243046; border-radius: 8px; padding: 11px 13px; font-size: 12px; backdrop-filter: blur(6px); }
+    .sf-legend h4 { margin: 0 0 7px; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #8b98ac; }
+    .sf-legend .row { margin: 5px 0; display: flex; align-items: center; gap: 9px; }
+    .sf-line { width: 30px; border-top: 2px solid #38bdf8; }
+    .sf-line.teal { border-top: 2px dashed #2dd4bf; }
+    .sf-line.dashed { border-top: 2px dashed #f59e0b; }
+    .sf-hint { margin-top: 8px; color: #5d6b80; font-size: 11px; }
+    .sf-loading { padding: 24px; color: #8b98ac; }
+
+    /* Selected table highlight (React Flow toggles .selected on the node wrapper). */
+    .react-flow__node.selected .sf-node { border-color: #38bdf8; box-shadow: 0 0 0 1px #38bdf8, 0 6px 22px rgba(56,189,248,.18); }
+
+    /* Diagram -> SQL panel. */
+    .sf-sql { position: absolute; right: 14px; bottom: 14px; z-index: 10; width: 380px; max-width: 44vw; background: rgba(15,21,32,.94); border: 1px solid #243046; border-radius: 10px; backdrop-filter: blur(6px); overflow: hidden; }
+    .sf-sql .bar { display: flex; align-items: center; justify-content: space-between; padding: 9px 12px; border-bottom: 1px solid #243046; }
+    .sf-sql .bar h4 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #8b98ac; }
+    .sf-sql .copy { font: inherit; font-size: 11px; cursor: pointer; color: #7dd3fc; background: #0e2a3a; border: 1px solid #1d4a63; border-radius: 6px; padding: 3px 10px; }
+    .sf-sql .copy:active { background: #123649; }
+    .sf-sql pre { margin: 0; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.55; color: #d7e2f0; white-space: pre-wrap; word-break: break-word; max-height: 38vh; overflow: auto; }
+    .sf-sql .kw { color: #7dd3fc; }
+    .sf-sql .note { color: #f59e0b; }
+    .sf-sql .empty { padding: 16px 12px; color: #5d6b80; font-size: 12px; }
+    .sf-sql .tabs { display: flex; gap: 4px; }
+    .sf-sql .tab { font: inherit; font-size: 11px; cursor: pointer; color: #8b98ac; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 3px 9px; }
+    .sf-sql .tab.on { color: #e6edf3; background: #1b2638; border-color: #243046; }
+    .sf-sql .subbar { display: flex; gap: 4px; padding: 7px 12px; border-bottom: 1px solid #243046; }
+    .sf-sql .migbar { padding: 8px 12px; border-top: 1px solid #243046; text-align: right; }
+    .sf-sql .copy.ghost { background: transparent; color: #8b98ac; border-color: #243046; }
+
+    /* Edit-mode controls inside table nodes. */
+    .sf-toolbar { position: absolute; top: 14px; right: 14px; z-index: 10; }
+    .sf-edit { font: inherit; font-size: 12px; cursor: pointer; color: #cbd5e1; background: rgba(17,24,38,.9); border: 1px solid #243046; border-radius: 8px; padding: 7px 12px; backdrop-filter: blur(6px); }
+    .sf-edit.on { color: #34d399; border-color: #1f5641; background: #0f241c; }
+    .sf-act { display: flex; gap: 4px; margin-left: 6px; }
+    .sf-iconbtn { font: inherit; font-size: 12px; line-height: 1; cursor: pointer; color: #6b7a90; background: transparent; border: none; padding: 2px 4px; border-radius: 4px; }
+    .sf-iconbtn:hover { color: #e6edf3; background: #1b2638; }
+    .sf-iconbtn.drop:hover { color: #f87171; }
+    .sf-name.added { color: #34d399; }
+    .sf-addrow { display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-top: 1px dashed #243046; }
+    .sf-addrow input { font: inherit; font-size: 11px; background: #0b0f17; color: #e6edf3; border: 1px solid #243046; border-radius: 5px; padding: 3px 6px; min-width: 0; }
+    .sf-addrow .nm { flex: 1.2; }
+    .sf-addrow .ty { flex: 1; }
+    .sf-addrow .add { cursor: pointer; color: #34d399; background: #0f241c; border: 1px solid #1f5641; border-radius: 5px; padding: 3px 8px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div id="root"><div class="sf-loading">Loading schema…</div></div>
+  <!--APP-->
+</body>
+</html>
