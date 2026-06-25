@@ -1,0 +1,45 @@
+{
+  "name": "schemaflow-vscode",
+  "displayName": "SchemaFlow",
+  "description": "Interactive DB schema diagram (ER + diagram⇄SQL + advisor) for your workspace. Reads SQL, Prisma, Django, SQLAlchemy and TypeORM.",
+  "version": "0.1.0",
+  "publisher": "kannajune",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "database",
+    "schema",
+    "erd",
+    "sql",
+    "prisma"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [],
+  "contributes": {
+    "commands": [
+      {
+        "command": "schemaflow.open",
+        "title": "SchemaFlow: Open Schema Diagram",
+        "category": "SchemaFlow"
+      }
+    ]
+  },
+  "scripts": {
+    "prebuild": "node ../../scripts/embed-html.mjs",
+    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js",
+    "package": "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@schemaflow/core": "*",
+    "@schemaflow/parser": "*",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.0"
+  }
+}

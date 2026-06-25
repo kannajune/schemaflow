@@ -549,13 +549,17 @@
       );
 
       React.useEffect(() => {
-        fetch('/api/schema').then((r) => r.json()).then((data) => {
+        const apply = (data) => {
           const g = buildGraph(data);
           setNodes(g.nodes);
           setEdges(g.edges);
           setMeta({ tables: data.tables.length, ...data.meta });
           setSchema(data);
-        });
+        };
+        // Embedded host (VS Code / JetBrains webview) injects the model directly;
+        // the CLI server path falls back to fetch.
+        if (window.__SCHEMAFLOW_MODEL__) apply(window.__SCHEMAFLOW_MODEL__);
+        else fetch('/api/schema').then((r) => r.json()).then(apply);
       }, []);
 
       const onSelectionChange = React.useCallback(

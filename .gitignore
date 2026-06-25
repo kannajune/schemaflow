@@ -3,7 +3,7 @@ dist/
 *.log
 .DS_Store
 # generated at install/build time
-packages/cli/src/html.generated.ts
+packages/*/src/html.generated.ts
 # compiled standalone binaries
 packages/cli/schemaflow
 schemaflow-macos-*
