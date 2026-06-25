@@ -5,6 +5,7 @@ import { parseSql, parseSourceFile, mergeModels, applyQueryEvidence } from '@sch
 import type { SchemaModel } from '@schemaflow/core';
 import { toMermaid, toDbml, advise, formatAdvice } from '@schemaflow/core';
 import { startServer } from '@schemaflow/server';
+import { INDEX_HTML } from './html.generated.js';
 
 const SOURCE_EXT = /\.(sql|prisma|py|ts)$/i;
 
@@ -115,7 +116,9 @@ function main() {
   }
 
   const port = Number(process.env.PORT ?? 4000);
-  startServer(model, port, resolveHtml());
+  // File path wins in dev (live-edit); embedded HTML is the fallback for the
+  // standalone binary, which has no sibling file.
+  startServer(model, port, resolveHtml(), INDEX_HTML);
   console.log('');
   console.log(`  SchemaFlow  →  http://localhost:${port}`);
   console.log(

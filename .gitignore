@@ -2,3 +2,11 @@ node_modules/
 dist/
 *.log
 .DS_Store
+# generated at install/build time
+packages/cli/src/html.generated.ts
+# compiled standalone binaries
+packages/cli/schemaflow
+schemaflow-macos-*
+schemaflow-linux-*
+schemaflow-windows-*
+*.tgz

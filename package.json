@@ -8,10 +8,13 @@
     "packages/*"
   ],
   "scripts": {
+    "prepare": "node scripts/embed-html.mjs",
+    "predev": "node scripts/embed-html.mjs",
     "dev": "tsx packages/cli/src/index.ts examples",
     "schemaflow": "tsx packages/cli/src/index.ts",
     "json": "tsx packages/cli/src/index.ts examples --json",
     "build": "npm -w schemaflow-cli run build",
+    "build:bin": "npm -w schemaflow-cli run build:bin",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "devDependencies": {

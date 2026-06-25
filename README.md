@@ -50,7 +50,7 @@ One TypeScript core, thin adapters per channel — so company tool policies neve
 | Channel | For | Status |
 |---------|-----|--------|
 | npm / `npx` (`schemaflow-cli`) | Node devs | ✅ **built** — `npm run build` → `npm publish` |
-| Standalone binary (`bun --compile`) | no-Node users (Python/Java/.NET) | planned |
+| Standalone binary (`bun --compile`) | no-Node users (Python/Java/.NET) | ✅ **built** (release workflow + install.sh) |
 | VS Code extension (webview) | editor users, any language | planned |
 | JetBrains plugin (PyCharm/IntelliJ/Rider) | JetBrains users | planned |
 | GitHub Action (headless → PR comment) | whole teams, zero install | ✅ **built** (`action.yml`) |
@@ -62,6 +62,23 @@ npm run build                 # bundles packages/cli → dist (one file + UI)
 cd packages/cli && npm publish # your npm login; publishes schemaflow-cli
 # then anyone: npx schemaflow-cli ./their-project
 ```
+
+## Standalone binary (no Node needed)
+
+For Python/Java/.NET/Go shops with no Node. Tagging `v*` runs the release workflow,
+which cross-compiles a self-contained executable per OS (UI embedded inside it):
+
+```bash
+# one-line install (macOS / Linux)
+curl -fsSL https://raw.githubusercontent.com/kannajune/schemaflow/main/scripts/install.sh | sh
+schemaflow ./your-project
+```
+
+Windows: download `schemaflow-windows-x64.exe` from Releases. Build locally with Bun:
+`npm run build:bin`.
+
+> Note: the app logic is fully embedded, but the UI currently loads React/React Flow
+> from the esm.sh CDN at first paint — fully-offline UI (vendored libs) is a follow-up.
 
 ## GitHub Action
 

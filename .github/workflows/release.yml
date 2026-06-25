@@ -1,0 +1,45 @@
+name: Release binaries
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: bun-darwin-arm64
+            out: schemaflow-macos-arm64
+          - target: bun-darwin-x64
+            out: schemaflow-macos-x64
+          - target: bun-linux-x64
+            out: schemaflow-linux-x64
+          - target: bun-linux-arm64
+            out: schemaflow-linux-arm64
+          - target: bun-windows-x64
+            out: schemaflow-windows-x64.exe
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: oven-sh/setup-bun@v2
+
+      - run: npm install
+      - run: node scripts/embed-html.mjs
+
+      # Bun cross-compiles a self-contained executable per target.
+      - name: Compile ${{ matrix.target }}
+        run: bun build packages/cli/src/index.ts --compile --target=${{ matrix.target }} --outfile ${{ matrix.out }}
+
+      - name: Attach to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.out }}
+          fail_on_unmatched_files: true

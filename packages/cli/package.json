@@ -25,7 +25,9 @@
     "cli"
   ],
   "scripts": {
+    "prebuild": "node ../../scripts/embed-html.mjs",
     "build": "tsup",
+    "build:bin": "node ../../scripts/embed-html.mjs && bun build src/index.ts --compile --outfile schemaflow",
     "prepublishOnly": "npm run build"
   },
   "publishConfig": {
