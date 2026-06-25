@@ -4,6 +4,10 @@ dist/
 .DS_Store
 # generated at install/build time
 packages/*/src/html.generated.ts
+packages/jetbrains/src/main/resources/web/
+# gradle / jetbrains build output
+packages/jetbrains/.gradle/
+packages/jetbrains/build/
 # compiled standalone binaries
 packages/cli/schemaflow
 schemaflow-macos-*

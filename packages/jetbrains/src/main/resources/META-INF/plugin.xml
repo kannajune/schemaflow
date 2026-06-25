@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>com.schemaflow.jetbrains</id>
+    <name>SchemaFlow</name>
+    <vendor email="kannajune@gmail.com" url="https://github.com/kannajune/schemaflow">kannajune</vendor>
+
+    <description><![CDATA[
+        Interactive database schema diagram inside JetBrains IDEs (IntelliJ, PyCharm, Rider, …).
+        ER diagram with declared / observed / inferred relationships, diagram⇄SQL and a schema
+        advisor. Reads SQL, Prisma, Django, SQLAlchemy and TypeORM from the open project.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <actions>
+        <action id="SchemaFlow.Open"
+                class="com.schemaflow.OpenSchemaFlowAction"
+                text="SchemaFlow: Open Schema Diagram"
+                description="Open the SchemaFlow diagram for this project">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

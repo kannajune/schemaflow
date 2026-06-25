@@ -52,7 +52,7 @@ One TypeScript core, thin adapters per channel — so company tool policies neve
 | npm / `npx` (`schemaflow-cli`) | Node devs | ✅ **built** — `npm run build` → `npm publish` |
 | Standalone binary (`bun --compile`) | no-Node users (Python/Java/.NET) | ✅ **built** (release workflow + install.sh) |
 | VS Code extension (webview) | editor users, any language | ✅ **built** (`packages/vscode`) |
-| JetBrains plugin (PyCharm/IntelliJ/Rider) | JetBrains users | planned |
+| JetBrains plugin (PyCharm/IntelliJ/Rider) | JetBrains users | ✅ **built** (`packages/jetbrains`) |
 | GitHub Action (headless → PR comment) | whole teams, zero install | ✅ **built** (`action.yml`) |
 
 Build & publish the npm package:
