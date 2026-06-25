@@ -1,0 +1,41 @@
+name: Schema diagram
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Build the bundle locally (the package isn't published yet, so we
+      # dogfood SchemaFlow on its own example schemas).
+      - run: npm install
+      - run: npm run build
+      - name: Generate schema report
+        run: node packages/cli/dist/index.js examples --report > "$RUNNER_TEMP/schemaflow.md"
+
+      - name: Post or update PR comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          body="$(cat "$RUNNER_TEMP/schemaflow.md")"
+          ids=$(gh api "repos/$REPO/issues/$PR/comments" \
+            --jq '.[] | select(.body | startswith("<!-- schemaflow-report -->")) | .id')
+          if [ -n "$ids" ]; then
+            for id in $ids; do
+              gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null
+            done
+          else
+            gh api "repos/$REPO/issues/$PR/comments" -f body="$body" >/dev/null
+          fi

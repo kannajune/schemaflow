@@ -1,0 +1,48 @@
+name: 'SchemaFlow'
+description: 'Render a database ER diagram (Mermaid) and schema advisor as a sticky PR comment.'
+branding:
+  icon: 'database'
+  color: 'blue'
+inputs:
+  path:
+    description: 'Directory to scan for schema files (.sql/.prisma/.py/.ts).'
+    required: false
+    default: '.'
+  version:
+    description: 'schemaflow-cli version to run via npx.'
+    required: false
+    default: 'latest'
+  token:
+    description: 'GitHub token used to post the PR comment.'
+    required: false
+    default: ${{ github.token }}
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Generate schema report
+      shell: bash
+      run: |
+        npx -y "schemaflow-cli@${{ inputs.version }}" "${{ inputs.path }}" --report > "$RUNNER_TEMP/schemaflow.md"
+    - name: Post or update PR comment
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        REPO: ${{ github.repository }}
+        PR: ${{ github.event.pull_request.number }}
+      run: |
+        body="$(cat "$RUNNER_TEMP/schemaflow.md")"
+        # Sticky comment: find a prior SchemaFlow comment by its marker and update it,
+        # otherwise create a new one — so PRs don't accumulate duplicates.
+        ids=$(gh api "repos/$REPO/issues/$PR/comments" \
+          --jq '.[] | select(.body | startswith("<!-- schemaflow-report -->")) | .id')
+        if [ -n "$ids" ]; then
+          for id in $ids; do
+            gh api -X PATCH "repos/$REPO/issues/comments/$id" -f body="$body" >/dev/null
+          done
+        else
+          gh api "repos/$REPO/issues/$PR/comments" -f body="$body" >/dev/null
+        fi

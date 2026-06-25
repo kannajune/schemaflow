@@ -53,7 +53,7 @@ One TypeScript core, thin adapters per channel — so company tool policies neve
 | Standalone binary (`bun --compile`) | no-Node users (Python/Java/.NET) | planned |
 | VS Code extension (webview) | editor users, any language | planned |
 | JetBrains plugin (PyCharm/IntelliJ/Rider) | JetBrains users | planned |
-| GitHub Action (headless → PR comment) | whole teams, zero install | core ready (`--mermaid`/`--advise`) |
+| GitHub Action (headless → PR comment) | whole teams, zero install | ✅ **built** (`action.yml`) |
 
 Build & publish the npm package:
 
@@ -62,6 +62,27 @@ npm run build                 # bundles packages/cli → dist (one file + UI)
 cd packages/cli && npm publish # your npm login; publishes schemaflow-cli
 # then anyone: npx schemaflow-cli ./their-project
 ```
+
+## GitHub Action
+
+Post an ER diagram + advisor as a sticky PR comment (Mermaid renders natively on GitHub).
+Once `schemaflow-cli` is published, any repo can use it:
+
+```yaml
+# .github/workflows/schema.yml
+on: pull_request
+permissions: { contents: read, pull-requests: write }
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kannajune/schemaflow@v1
+        with:
+          path: .          # where your schema/migrations live
+```
+
+This repo also dogfoods it via `.github/workflows/schema-pr.yml` (builds locally).
 
 ## Monorepo layout
 
