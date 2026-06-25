@@ -1,0 +1,40 @@
+{
+  "name": "schemaflow-cli",
+  "version": "0.1.0",
+  "description": "Interactive, code-based DB schema visualizer with diagram⇄SQL, auto join-paths, migrations, export and an advisor. Reads SQL, Prisma, Django, SQLAlchemy and TypeORM.",
+  "type": "module",
+  "bin": {
+    "schemaflow": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "keywords": [
+    "database",
+    "schema",
+    "erd",
+    "er-diagram",
+    "sql",
+    "prisma",
+    "orm",
+    "visualization",
+    "cli"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@schemaflow/core": "*",
+    "@schemaflow/parser": "*",
+    "@schemaflow/server": "*",
+    "tsup": "^8.3.5"
+  }
+}

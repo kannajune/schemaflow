@@ -1,0 +1,95 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { parseSql, parseSourceFile, mergeModels, applyQueryEvidence } from '@schemaflow/parser';
+import type { SchemaModel } from '@schemaflow/core';
+import { toMermaid, toDbml, advise, formatAdvice } from '@schemaflow/core';
+import { startServer } from '@schemaflow/server';
+
+const SOURCE_EXT = /\.(sql|prisma|py|ts)$/i;
+
+/** Recursively collect schema source files (.sql/.prisma/.py/.ts). */
+function findSourceFiles(target: string): string[] {
+  const stat = fs.statSync(target);
+  if (stat.isFile()) return [target];
+
+  const out: string[] = [];
+  for (const entry of fs.readdirSync(target, { withFileTypes: true })) {
+    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+    const full = path.join(target, entry.name);
+    if (entry.isDirectory()) out.push(...findSourceFiles(full));
+    else if (SOURCE_EXT.test(entry.name)) out.push(full);
+  }
+  return out;
+}
+
+/** Parse one file by type: .sql via DDL parser, others via ORM/DSL parsers. */
+function parseFile(text: string, file: string, rel: string): SchemaModel | null {
+  if (/\.sql$/i.test(file)) return parseSql(text, rel);
+  return parseSourceFile(text, file, rel);
+}
+
+/** Locate the UI html across dev (monorepo) and bundled (dist) layouts. */
+function resolveHtml(): string | undefined {
+  const here = path.dirname(fileURLToPath(import.meta.url));
+  const candidates = [
+    path.join(here, 'index.html'), // bundled: dist/index.html
+    path.join(here, '..', '..', 'server', 'public', 'index.html'), // dev monorepo
+  ];
+  return candidates.find((p) => fs.existsSync(p));
+}
+
+function main() {
+  const args = process.argv.slice(2);
+  const jsonOnly = args.includes('--json');
+  const target = path.resolve(args.find((a) => !a.startsWith('--')) ?? '.');
+
+  const files = findSourceFiles(target);
+  if (files.length === 0) {
+    console.error(`No schema source files (.sql/.prisma/.py/.ts) found under ${target}`);
+    process.exit(1);
+  }
+
+  const parsed: SchemaModel[] = [];
+  const sqlTexts: string[] = [];
+  for (const f of files) {
+    const text = fs.readFileSync(f, 'utf8');
+    const model = parseFile(text, f, path.relative(process.cwd(), f));
+    if (model) parsed.push(model);
+    if (/\.sql$/i.test(f)) sqlTexts.push(text); // only SQL files carry query JOINs
+  }
+
+  const model = mergeModels(parsed);
+  // Second pass: mine SQL files for real query JOINs to upgrade/extend edges.
+  applyQueryEvidence(model, sqlTexts);
+
+  // Headless outputs (for scripting / CI / the GitHub Action) — no server.
+  if (jsonOnly) {
+    console.log(JSON.stringify(model, null, 2));
+    return;
+  }
+  if (args.includes('--mermaid')) {
+    console.log(toMermaid(model));
+    return;
+  }
+  if (args.includes('--dbml')) {
+    console.log(toDbml(model));
+    return;
+  }
+  if (args.includes('--advise')) {
+    console.log(formatAdvice(advise(model)));
+    return;
+  }
+
+  const port = Number(process.env.PORT ?? 4000);
+  startServer(model, port, resolveHtml());
+  console.log('');
+  console.log(`  SchemaFlow  →  http://localhost:${port}`);
+  console.log(
+    `  ${model.tables.length} tables · ${model.meta.declaredCount} declared · ${model.meta.observedCount} observed · ${model.meta.inferredCount} inferred`,
+  );
+  console.log(`  Scanned ${files.length} file(s). Ctrl+C to stop.`);
+  console.log('');
+}
+
+main();
