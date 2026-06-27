@@ -15,3 +15,4 @@ schemaflow-macos-*
 schemaflow-linux-*
 schemaflow-windows-*
 *.tgz
+*.vsix
