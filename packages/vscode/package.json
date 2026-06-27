@@ -5,6 +5,14 @@
   "version": "0.1.0",
   "publisher": "kannajune",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kannajune/schemaflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kannajune/schemaflow/issues"
+  },
+  "homepage": "https://github.com/kannajune/schemaflow#readme",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -31,8 +39,9 @@
     ]
   },
   "scripts": {
-    "prebuild": "node ../../scripts/embed-html.mjs",
+    "prebuild": "node ../../scripts/build-ui.mjs && node ../../scripts/embed-html.mjs",
     "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js",
+    "vscode:prepublish": "npm run build",
     "package": "vsce package --no-dependencies"
   },
   "devDependencies": {

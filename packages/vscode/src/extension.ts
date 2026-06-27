@@ -52,10 +52,10 @@ async function buildModel(): Promise<SchemaModel | undefined> {
 
 /** Inject the model + a webview CSP into the shared UI html. */
 function renderHtml(model: SchemaModel): string {
+  // Everything (React, React Flow, CSS) is inlined — no remote origins needed.
   const csp =
     `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; ` +
-    `img-src https: data:; style-src 'unsafe-inline' https://esm.sh; font-src https://esm.sh; ` +
-    `script-src 'unsafe-inline' https://esm.sh; connect-src https://esm.sh;">`;
+    `img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src data:;">`;
   const inject = `<script>window.__SCHEMAFLOW_MODEL__ = ${JSON.stringify(model)};</script>`;
   // Function replacer: the model JSON can contain `$` sequences that a plain
   // replacement string would mis-interpret.
